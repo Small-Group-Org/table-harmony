@@ -1,9 +1,8 @@
-import { useState } from "react";
-import { TimeSlotSelector } from "@/components/TimeSlotSelector";
-import { AreaFilters } from "@/components/AreaFilters";
+import { useState, useMemo } from "react";
+import { AppSidebar } from "@/components/AppSidebar";
 import { TableMap } from "@/components/TableMap";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { Menu } from "lucide-react";
 
 // Define time slots
 const TIME_SLOTS = [
@@ -18,7 +17,7 @@ const TIME_SLOTS = [
 // Define areas
 const AREAS = ["Garden", "Fountain", "1st Floor", "2nd Floor"];
 
-// Define tables with their properties
+// Define tables with their properties - more spread out and realistic
 export interface Table {
   id: number;
   seats: number;
@@ -30,21 +29,29 @@ export interface Table {
 }
 
 const TABLES: Table[] = [
-  // Garden area
-  { id: 1, seats: 4, x: 50, y: 50, area: "Garden", width: 120, height: 80 },
-  { id: 2, seats: 6, x: 250, y: 50, area: "Garden", width: 150, height: 80 },
-  { id: 3, seats: 4, x: 50, y: 180, area: "Garden", width: 120, height: 80 },
-  { id: 4, seats: 4, x: 250, y: 180, area: "Garden", width: 120, height: 80 },
-  // Fountain area
-  { id: 5, seats: 8, x: 50, y: 320, area: "Fountain", width: 180, height: 80 },
-  { id: 6, seats: 6, x: 280, y: 320, area: "Fountain", width: 150, height: 80 },
-  // 1st Floor
-  { id: 7, seats: 2, x: 50, y: 460, area: "1st Floor", width: 80, height: 80 },
-  { id: 8, seats: 2, x: 160, y: 460, area: "1st Floor", width: 80, height: 80 },
-  { id: 9, seats: 4, x: 280, y: 460, area: "1st Floor", width: 120, height: 80 },
-  // 2nd Floor
-  { id: 10, seats: 4, x: 50, y: 590, area: "2nd Floor", width: 120, height: 80 },
-  { id: 11, seats: 6, x: 220, y: 590, area: "2nd Floor", width: 150, height: 80 },
+  // Garden area (top-left quadrant) - outdoor tables
+  { id: 1, seats: 4, x: 80, y: 80, area: "Garden", width: 100, height: 70 },
+  { id: 2, seats: 2, x: 220, y: 80, area: "Garden", width: 70, height: 70 },
+  { id: 3, seats: 6, x: 80, y: 200, area: "Garden", width: 130, height: 80 },
+  { id: 4, seats: 4, x: 250, y: 200, area: "Garden", width: 100, height: 70 },
+  
+  // Fountain area (top-right quadrant) - premium tables
+  { id: 5, seats: 8, x: 480, y: 80, area: "Fountain", width: 160, height: 90 },
+  { id: 6, seats: 4, x: 680, y: 80, area: "Fountain", width: 100, height: 70 },
+  { id: 7, seats: 6, x: 480, y: 220, area: "Fountain", width: 130, height: 80 },
+  { id: 8, seats: 4, x: 650, y: 220, area: "Fountain", width: 100, height: 70 },
+  
+  // 1st Floor (bottom-left quadrant) - main dining
+  { id: 9, seats: 2, x: 80, y: 420, area: "1st Floor", width: 70, height: 70 },
+  { id: 10, seats: 4, x: 190, y: 420, area: "1st Floor", width: 100, height: 70 },
+  { id: 11, seats: 4, x: 80, y: 540, area: "1st Floor", width: 100, height: 70 },
+  { id: 12, seats: 6, x: 220, y: 540, area: "1st Floor", width: 130, height: 80 },
+  
+  // 2nd Floor (bottom-right quadrant) - private dining
+  { id: 13, seats: 4, x: 480, y: 420, area: "2nd Floor", width: 100, height: 70 },
+  { id: 14, seats: 6, x: 620, y: 420, area: "2nd Floor", width: 130, height: 80 },
+  { id: 15, seats: 8, x: 480, y: 560, area: "2nd Floor", width: 160, height: 90 },
+  { id: 16, seats: 2, x: 680, y: 580, area: "2nd Floor", width: 70, height: 70 },
 ];
 
 export type BookingState = Record<string, Record<number, boolean>>;
@@ -55,14 +62,6 @@ const Index = () => {
   const [bookings, setBookings] = useState<BookingState>({});
 
   const currentTimeSlot = TIME_SLOTS[currentTimeSlotIndex];
-
-  const handlePreviousSlot = () => {
-    setCurrentTimeSlotIndex((prev) => Math.max(0, prev - 1));
-  };
-
-  const handleNextSlot = () => {
-    setCurrentTimeSlotIndex((prev) => Math.min(TIME_SLOTS.length - 1, prev + 1));
-  };
 
   const handleTableClick = (tableId: number) => {
     setBookings((prev) => {
@@ -83,68 +82,65 @@ const Index = () => {
 
   const currentBookings = bookings[currentTimeSlot] || {};
 
+  // Calculate statistics
+  const statistics = useMemo(() => {
+    const totalTables = filteredTables.length;
+    const bookedTables = filteredTables.filter((table) => currentBookings[table.id]).length;
+    const availableTables = totalTables - bookedTables;
+
+    return { totalTables, bookedTables, availableTables };
+  }, [filteredTables, currentBookings]);
+
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-5xl">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Restaurant Table Booking</h1>
-          <p className="text-muted-foreground">Manage table availability across different time slots</p>
-        </div>
-
-        {/* Time Slot Navigation */}
-        <div className="mb-6 flex items-center justify-between bg-card rounded-2xl p-4 shadow-sm">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handlePreviousSlot}
-            disabled={currentTimeSlotIndex === 0}
-            className="rounded-full"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
-          <div className="flex-1 text-center">
-            <p className="text-sm text-muted-foreground mb-1">Current Time Slot</p>
-            <p className="text-xl font-semibold text-foreground">{currentTimeSlot}</p>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleNextSlot}
-            disabled={currentTimeSlotIndex === TIME_SLOTS.length - 1}
-            className="rounded-full"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </Button>
-        </div>
-
-        {/* Area Filters */}
-        <AreaFilters
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full bg-background">
+        <AppSidebar
           areas={AREAS}
           selectedArea={selectedArea}
           onAreaSelect={setSelectedArea}
+          timeSlots={TIME_SLOTS}
+          currentTimeSlotIndex={currentTimeSlotIndex}
+          onTimeSlotChange={setCurrentTimeSlotIndex}
+          statistics={statistics}
         />
 
-        {/* Legend */}
-        <div className="mb-6 flex items-center gap-6 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-table-available border-2 border-table-available-border" />
-            <span className="text-muted-foreground">Available</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-table-booked" />
-            <span className="text-muted-foreground">Booked</span>
-          </div>
-        </div>
+        <main className="flex-1 flex flex-col h-screen overflow-hidden">
+          {/* Header */}
+          <header className="h-16 border-b border-border bg-card flex items-center px-6 gap-4 shrink-0">
+            <SidebarTrigger className="lg:hidden">
+              <Menu className="h-5 w-5" />
+            </SidebarTrigger>
+            <div className="flex-1">
+              <h1 className="text-lg font-semibold text-foreground">
+                {currentTimeSlot}
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {selectedArea ? `${selectedArea} Area` : "All Areas"}
+              </p>
+            </div>
+            <div className="flex items-center gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded bg-table-available border border-table-available-border" />
+                <span className="text-muted-foreground">Available</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded bg-table-booked" />
+                <span className="text-muted-foreground">Booked</span>
+              </div>
+            </div>
+          </header>
 
-        {/* Table Map */}
-        <TableMap
-          tables={filteredTables}
-          bookings={currentBookings}
-          onTableClick={handleTableClick}
-        />
+          {/* Table Map - fills remaining space */}
+          <div className="flex-1 overflow-hidden p-6">
+            <TableMap
+              tables={filteredTables}
+              bookings={currentBookings}
+              onTableClick={handleTableClick}
+            />
+          </div>
+        </main>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 
