@@ -57,6 +57,17 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        table: {
+          available: "hsl(var(--table-available))",
+          "available-border": "hsl(var(--table-available-border))",
+          booked: "hsl(var(--table-booked))",
+          "booked-foreground": "hsl(var(--table-booked-foreground))",
+          hover: "hsl(var(--table-hover))",
+        },
+        chair: {
+          DEFAULT: "hsl(var(--chair))",
+          occupied: "hsl(var(--chair-occupied))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
