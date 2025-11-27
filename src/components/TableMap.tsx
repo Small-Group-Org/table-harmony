@@ -10,7 +10,7 @@ interface TableMapProps {
 export const TableMap = ({ tables, bookings, onTableClick }: TableMapProps) => {
   const getChairPositions = (seats: number, width: number, height: number) => {
     const chairs = [];
-    const chairSize = 20;
+    const chairSize = 18;
     
     // Calculate how many chairs on each side
     const topBottomChairs = Math.ceil(seats / 2);
@@ -21,7 +21,7 @@ export const TableMap = ({ tables, bookings, onTableClick }: TableMapProps) => {
     for (let i = 0; i < topBottomChairs; i++) {
       chairs.push({
         x: topSpacing * (i + 1) - chairSize / 2,
-        y: -chairSize - 6,
+        y: -chairSize - 8,
       });
     }
 
@@ -30,7 +30,7 @@ export const TableMap = ({ tables, bookings, onTableClick }: TableMapProps) => {
     for (let i = 0; i < sideChairs; i++) {
       chairs.push({
         x: bottomSpacing * (i + 1) - chairSize / 2,
-        y: height + 6,
+        y: height + 8,
       });
     }
 
@@ -38,37 +38,19 @@ export const TableMap = ({ tables, bookings, onTableClick }: TableMapProps) => {
   };
 
   return (
-    <div className="w-full h-full bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
+    <div className="w-full h-full bg-card rounded-2xl border border-border shadow-sm overflow-hidden p-4">
       <svg
-        viewBox="0 0 850 700"
+        viewBox="0 0 920 620"
         className="w-full h-full"
         preserveAspectRatio="xMidYMid meet"
       >
-        {/* Background grid areas */}
+        {/* Background grid */}
         <defs>
-          <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
-            <path d="M 50 0 L 0 0 0 50" fill="none" stroke="hsl(var(--border))" strokeWidth="0.5" opacity="0.1" />
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="hsl(var(--border))" strokeWidth="0.5" opacity="0.08" />
           </pattern>
         </defs>
-        <rect width="850" height="700" fill="url(#grid)" />
-
-        {/* Area labels (background) */}
-        <text x="200" y="40" textAnchor="middle" className="fill-muted-foreground text-xs font-medium" opacity="0.5">
-          GARDEN
-        </text>
-        <text x="600" y="40" textAnchor="middle" className="fill-muted-foreground text-xs font-medium" opacity="0.5">
-          FOUNTAIN
-        </text>
-        <text x="200" y="380" textAnchor="middle" className="fill-muted-foreground text-xs font-medium" opacity="0.5">
-          1ST FLOOR
-        </text>
-        <text x="600" y="380" textAnchor="middle" className="fill-muted-foreground text-xs font-medium" opacity="0.5">
-          2ND FLOOR
-        </text>
-
-        {/* Dividing lines */}
-        <line x1="400" y1="0" x2="400" y2="700" stroke="hsl(var(--border))" strokeWidth="2" opacity="0.3" strokeDasharray="10,5" />
-        <line x1="0" y1="350" x2="850" y2="350" stroke="hsl(var(--border))" strokeWidth="2" opacity="0.3" strokeDasharray="10,5" />
+        <rect width="920" height="620" fill="url(#grid)" />
 
         {/* Tables */}
         {tables.map((table) => {
@@ -88,12 +70,17 @@ export const TableMap = ({ tables, bookings, onTableClick }: TableMapProps) => {
             >
               {/* Hover effect background */}
               <rect
-                x={table.x - 8}
-                y={table.y - 8}
-                width={width + 16}
-                height={height + 16}
+                x={table.x - 10}
+                y={table.y - 10}
+                width={width + 20}
+                height={height + 20}
                 rx="16"
-                className="fill-accent opacity-0 hover:opacity-10 transition-opacity duration-200"
+                className={cn(
+                  "transition-opacity duration-200",
+                  isBooked 
+                    ? "fill-emerald-100 dark:fill-emerald-900/30 opacity-0 hover:opacity-30"
+                    : "fill-primary/5 opacity-0 hover:opacity-100"
+                )}
               />
 
               {/* Table */}
@@ -106,11 +93,13 @@ export const TableMap = ({ tables, bookings, onTableClick }: TableMapProps) => {
                 className={cn(
                   "transition-all duration-300",
                   isBooked
-                    ? "fill-table-booked stroke-table-booked shadow-lg"
-                    : "fill-table-available stroke-table-available-border hover:stroke-primary"
+                    ? "fill-table-booked stroke-emerald-600 dark:stroke-emerald-500"
+                    : "fill-table-available stroke-table-available-border hover:stroke-primary hover:fill-table-hover"
                 )}
-                strokeWidth="2.5"
-                filter={isBooked ? "drop-shadow(0 4px 6px rgba(59, 130, 246, 0.3))" : ""}
+                strokeWidth="3"
+                style={{
+                  filter: isBooked ? "drop-shadow(0 4px 12px rgba(34, 197, 94, 0.25))" : "none"
+                }}
               />
 
               {/* Table Number */}
@@ -130,15 +119,15 @@ export const TableMap = ({ tables, bookings, onTableClick }: TableMapProps) => {
               {/* Seats indicator */}
               <text
                 x={table.x + width / 2}
-                y={table.y + height / 2 + 14}
+                y={table.y + height / 2 + 16}
                 textAnchor="middle"
                 dominantBaseline="middle"
                 className={cn(
-                  "text-xs font-medium transition-all duration-300",
-                  isBooked ? "fill-table-booked-foreground opacity-80" : "fill-muted-foreground"
+                  "text-xs font-semibold transition-all duration-300",
+                  isBooked ? "fill-table-booked-foreground opacity-90" : "fill-muted-foreground"
                 )}
               >
-                {table.seats} seats
+                {table.seats} SEATS
               </text>
 
               {/* Chairs */}
@@ -147,13 +136,13 @@ export const TableMap = ({ tables, bookings, onTableClick }: TableMapProps) => {
                   <rect
                     x={table.x + chair.x}
                     y={table.y + chair.y}
-                    width="20"
-                    height="20"
-                    rx="5"
+                    width="18"
+                    height="18"
+                    rx="4"
                     className={cn(
                       "transition-all duration-300",
                       isBooked 
-                        ? "fill-chair-occupied stroke-chair-occupied" 
+                        ? "fill-chair-occupied stroke-emerald-600 dark:stroke-emerald-500" 
                         : "fill-chair stroke-border"
                     )}
                     strokeWidth="1.5"

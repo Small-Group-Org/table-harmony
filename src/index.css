@@ -39,14 +39,14 @@ All colors MUST be HSL.
     --radius: 1rem;
     
     /* Custom tokens for restaurant booking */
-    --table-available: 220 14% 96%;
+    --table-available: 0 0% 98%;
     --table-available-border: 220 13% 85%;
-    --table-booked: 217 91% 60%;
+    --table-booked: 142 76% 36%;
     --table-booked-foreground: 0 0% 100%;
-    --table-hover: 217 91% 95%;
+    --table-hover: 217 91% 98%;
     
     --chair: 220 13% 85%;
-    --chair-occupied: 217 91% 70%;
+    --chair-occupied: 142 76% 46%;
 
     --sidebar-background: 0 0% 98%;
 
@@ -96,12 +96,12 @@ All colors MUST be HSL.
     
     --table-available: 217 33% 20%;
     --table-available-border: 217 33% 30%;
-    --table-booked: 217 91% 60%;
+    --table-booked: 142 76% 36%;
     --table-booked-foreground: 0 0% 100%;
     --table-hover: 217 33% 25%;
     
     --chair: 217 33% 30%;
-    --chair-occupied: 217 91% 70%;
+    --chair-occupied: 142 76% 46%;
     
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
