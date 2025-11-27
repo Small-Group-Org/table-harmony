@@ -1,4 +1,4 @@
-import { TreeDeciduous, Droplets, Building, Building2, Clock, Users, CheckCircle2 } from "lucide-react";
+import { Clock, Users, CheckCircle2, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -13,9 +13,6 @@ import {
 } from "@/components/ui/sidebar";
 
 interface AppSidebarProps {
-  areas: string[];
-  selectedArea: string | null;
-  onAreaSelect: (area: string | null) => void;
   timeSlots: string[];
   currentTimeSlotIndex: number;
   onTimeSlotChange: (index: number) => void;
@@ -26,17 +23,7 @@ interface AppSidebarProps {
   };
 }
 
-const areaIcons: Record<string, React.ReactNode> = {
-  Garden: <TreeDeciduous className="h-4 w-4" />,
-  Fountain: <Droplets className="h-4 w-4" />,
-  "1st Floor": <Building className="h-4 w-4" />,
-  "2nd Floor": <Building2 className="h-4 w-4" />,
-};
-
 export function AppSidebar({
-  areas,
-  selectedArea,
-  onAreaSelect,
   timeSlots,
   currentTimeSlotIndex,
   onTimeSlotChange,
@@ -54,36 +41,36 @@ export function AppSidebar({
         {/* Statistics */}
         <SidebarGroup>
           <SidebarGroupLabel className="text-xs uppercase tracking-wider mb-3">
-            Overview
+            Current Status
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <div className="grid grid-cols-1 gap-2">
-              <div className="bg-card rounded-xl p-3 border border-border">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs text-muted-foreground">Total Tables</span>
-                  <Users className="h-3.5 w-3.5 text-muted-foreground" />
+            <div className="grid grid-cols-1 gap-3">
+              <div className="bg-card rounded-xl p-4 border border-border shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-medium text-muted-foreground">Total Tables</span>
+                  <Users className="h-4 w-4 text-muted-foreground" />
                 </div>
-                <p className="text-2xl font-bold text-foreground">{statistics.totalTables}</p>
+                <p className="text-3xl font-bold text-foreground">{statistics.totalTables}</p>
               </div>
-              <div className="bg-primary/10 rounded-xl p-3 border border-primary/20">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs text-primary">Booked</span>
-                  <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+              <div className="bg-emerald-50 dark:bg-emerald-950/30 rounded-xl p-4 border border-emerald-200 dark:border-emerald-800 shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">Booked</span>
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                 </div>
-                <p className="text-2xl font-bold text-primary">{statistics.bookedTables}</p>
+                <p className="text-3xl font-bold text-emerald-700 dark:text-emerald-400">{statistics.bookedTables}</p>
               </div>
-              <div className="bg-muted rounded-xl p-3 border border-border">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs text-muted-foreground">Available</span>
-                  <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground" />
+              <div className="bg-blue-50 dark:bg-blue-950/30 rounded-xl p-4 border border-blue-200 dark:border-blue-800 shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-medium text-blue-700 dark:text-blue-400">Available</span>
+                  <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                 </div>
-                <p className="text-2xl font-bold text-foreground">{statistics.availableTables}</p>
+                <p className="text-3xl font-bold text-blue-700 dark:text-blue-400">{statistics.availableTables}</p>
               </div>
             </div>
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <Separator className="my-4" />
+        <Separator className="my-6" />
 
         {/* Time Slots */}
         <SidebarGroup>
@@ -92,13 +79,13 @@ export function AppSidebar({
             Time Slots
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-1">
               {timeSlots.map((slot, index) => (
                 <SidebarMenuItem key={slot}>
                   <Button
                     variant={currentTimeSlotIndex === index ? "default" : "ghost"}
                     className={cn(
-                      "w-full justify-start text-sm",
+                      "w-full justify-start text-sm font-medium",
                       currentTimeSlotIndex === index && "shadow-sm"
                     )}
                     onClick={() => onTimeSlotChange(index)}
@@ -107,45 +94,6 @@ export function AppSidebar({
                   </Button>
                 </SidebarMenuItem>
               ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <Separator className="my-4" />
-
-        {/* Area Filters */}
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-xs uppercase tracking-wider mb-3">
-            Filter by Area
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {areas.map((area) => {
-                const isSelected = selectedArea === area;
-                return (
-                  <SidebarMenuItem key={area}>
-                    <Button
-                      variant={isSelected ? "secondary" : "ghost"}
-                      className="w-full justify-start text-sm gap-2"
-                      onClick={() => onAreaSelect(isSelected ? null : area)}
-                    >
-                      {areaIcons[area]}
-                      {area}
-                    </Button>
-                  </SidebarMenuItem>
-                );
-              })}
-              {selectedArea && (
-                <SidebarMenuItem>
-                  <Button
-                    variant="ghost"
-                    onClick={() => onAreaSelect(null)}
-                    className="w-full justify-start text-sm text-muted-foreground"
-                  >
-                    Clear Filter
-                  </Button>
-                </SidebarMenuItem>
-              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

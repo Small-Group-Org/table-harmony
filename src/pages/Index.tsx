@@ -14,51 +14,49 @@ const TIME_SLOTS = [
   "9:00 PM - 10:00 PM",
 ];
 
-// Define areas
-const AREAS = ["Garden", "Fountain", "1st Floor", "2nd Floor"];
-
-// Define tables with their properties - more spread out and realistic
+// Define tables with proper spacing - single restaurant floor
 export interface Table {
   id: number;
   seats: number;
   x: number;
   y: number;
-  area: string;
   width?: number;
   height?: number;
 }
 
 const TABLES: Table[] = [
-  // Garden area (top-left quadrant) - outdoor tables
-  { id: 1, seats: 4, x: 80, y: 80, area: "Garden", width: 100, height: 70 },
-  { id: 2, seats: 2, x: 220, y: 80, area: "Garden", width: 70, height: 70 },
-  { id: 3, seats: 6, x: 80, y: 200, area: "Garden", width: 130, height: 80 },
-  { id: 4, seats: 4, x: 250, y: 200, area: "Garden", width: 100, height: 70 },
+  // Row 1 - Top
+  { id: 1, seats: 4, x: 60, y: 60, width: 100, height: 70 },
+  { id: 2, seats: 2, x: 220, y: 60, width: 70, height: 70 },
+  { id: 3, seats: 6, x: 350, y: 60, width: 130, height: 80 },
+  { id: 4, seats: 4, x: 540, y: 60, width: 100, height: 70 },
+  { id: 5, seats: 8, x: 700, y: 60, width: 160, height: 90 },
   
-  // Fountain area (top-right quadrant) - premium tables
-  { id: 5, seats: 8, x: 480, y: 80, area: "Fountain", width: 160, height: 90 },
-  { id: 6, seats: 4, x: 680, y: 80, area: "Fountain", width: 100, height: 70 },
-  { id: 7, seats: 6, x: 480, y: 220, area: "Fountain", width: 130, height: 80 },
-  { id: 8, seats: 4, x: 650, y: 220, area: "Fountain", width: 100, height: 70 },
+  // Row 2
+  { id: 6, seats: 4, x: 60, y: 200, width: 100, height: 70 },
+  { id: 7, seats: 4, x: 220, y: 200, width: 100, height: 70 },
+  { id: 8, seats: 6, x: 380, y: 200, width: 130, height: 80 },
+  { id: 9, seats: 4, x: 570, y: 200, width: 100, height: 70 },
+  { id: 10, seats: 2, x: 730, y: 200, width: 70, height: 70 },
   
-  // 1st Floor (bottom-left quadrant) - main dining
-  { id: 9, seats: 2, x: 80, y: 420, area: "1st Floor", width: 70, height: 70 },
-  { id: 10, seats: 4, x: 190, y: 420, area: "1st Floor", width: 100, height: 70 },
-  { id: 11, seats: 4, x: 80, y: 540, area: "1st Floor", width: 100, height: 70 },
-  { id: 12, seats: 6, x: 220, y: 540, area: "1st Floor", width: 130, height: 80 },
+  // Row 3
+  { id: 11, seats: 6, x: 60, y: 340, width: 130, height: 80 },
+  { id: 12, seats: 4, x: 250, y: 340, width: 100, height: 70 },
+  { id: 13, seats: 4, x: 410, y: 340, width: 100, height: 70 },
+  { id: 14, seats: 8, x: 570, y: 340, width: 160, height: 90 },
   
-  // 2nd Floor (bottom-right quadrant) - private dining
-  { id: 13, seats: 4, x: 480, y: 420, area: "2nd Floor", width: 100, height: 70 },
-  { id: 14, seats: 6, x: 620, y: 420, area: "2nd Floor", width: 130, height: 80 },
-  { id: 15, seats: 8, x: 480, y: 560, area: "2nd Floor", width: 160, height: 90 },
-  { id: 16, seats: 2, x: 680, y: 580, area: "2nd Floor", width: 70, height: 70 },
+  // Row 4 - Bottom
+  { id: 15, seats: 2, x: 60, y: 490, width: 70, height: 70 },
+  { id: 16, seats: 4, x: 190, y: 490, width: 100, height: 70 },
+  { id: 17, seats: 6, x: 350, y: 490, width: 130, height: 80 },
+  { id: 18, seats: 4, x: 540, y: 490, width: 100, height: 70 },
+  { id: 19, seats: 4, x: 700, y: 490, width: 100, height: 70 },
 ];
 
 export type BookingState = Record<string, Record<number, boolean>>;
 
 const Index = () => {
   const [currentTimeSlotIndex, setCurrentTimeSlotIndex] = useState(0);
-  const [selectedArea, setSelectedArea] = useState<string | null>(null);
   const [bookings, setBookings] = useState<BookingState>({});
 
   const currentTimeSlot = TIME_SLOTS[currentTimeSlotIndex];
@@ -76,28 +74,21 @@ const Index = () => {
     });
   };
 
-  const filteredTables = selectedArea
-    ? TABLES.filter((table) => table.area === selectedArea)
-    : TABLES;
-
   const currentBookings = bookings[currentTimeSlot] || {};
 
   // Calculate statistics
   const statistics = useMemo(() => {
-    const totalTables = filteredTables.length;
-    const bookedTables = filteredTables.filter((table) => currentBookings[table.id]).length;
+    const totalTables = TABLES.length;
+    const bookedTables = TABLES.filter((table) => currentBookings[table.id]).length;
     const availableTables = totalTables - bookedTables;
 
     return { totalTables, bookedTables, availableTables };
-  }, [filteredTables, currentBookings]);
+  }, [currentBookings]);
 
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar
-          areas={AREAS}
-          selectedArea={selectedArea}
-          onAreaSelect={setSelectedArea}
           timeSlots={TIME_SLOTS}
           currentTimeSlotIndex={currentTimeSlotIndex}
           onTimeSlotChange={setCurrentTimeSlotIndex}
@@ -106,7 +97,7 @@ const Index = () => {
 
         <main className="flex-1 flex flex-col h-screen overflow-hidden">
           {/* Header */}
-          <header className="h-16 border-b border-border bg-card flex items-center px-6 gap-4 shrink-0">
+          <header className="h-16 border-b border-border bg-card flex items-center px-6 gap-4 shrink-0 shadow-sm">
             <SidebarTrigger className="lg:hidden">
               <Menu className="h-5 w-5" />
             </SidebarTrigger>
@@ -115,17 +106,17 @@ const Index = () => {
                 {currentTimeSlot}
               </h1>
               <p className="text-sm text-muted-foreground">
-                {selectedArea ? `${selectedArea} Area` : "All Areas"}
+                Restaurant Floor Plan
               </p>
             </div>
-            <div className="flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-6 text-sm">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded bg-table-available border border-table-available-border" />
-                <span className="text-muted-foreground">Available</span>
+                <div className="w-4 h-4 rounded bg-table-available border-2 border-table-available-border" />
+                <span className="text-muted-foreground font-medium">Available</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded bg-table-booked" />
-                <span className="text-muted-foreground">Booked</span>
+                <div className="w-4 h-4 rounded bg-table-booked" />
+                <span className="text-muted-foreground font-medium">Booked</span>
               </div>
             </div>
           </header>
@@ -133,7 +124,7 @@ const Index = () => {
           {/* Table Map - fills remaining space */}
           <div className="flex-1 overflow-hidden p-6">
             <TableMap
-              tables={filteredTables}
+              tables={TABLES}
               bookings={currentBookings}
               onTableClick={handleTableClick}
             />
